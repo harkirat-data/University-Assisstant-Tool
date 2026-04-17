@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatBox = document.getElementById('chat-box');
 
     if (chatInput && sendBtn && chatBox) {
-        function addMessage(text, sender) {
+        function addMessage(text, sender, showSource = false) {
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${sender}-message`;
             const bubble = document.createElement('div');
@@ -20,6 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             msgDiv.appendChild(bubble);
+
+            // Add source label below AI answer bubble
+            if (sender === 'ai' && showSource) {
+                const sourceLabel = document.createElement('span');
+                sourceLabel.className = 'source-label';
+                sourceLabel.textContent = 'source: University FAQs document';
+                msgDiv.appendChild(sourceLabel);
+            }
+
             chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
@@ -49,11 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 chatBox.removeChild(tempMsgDiv);
                 if (data.answer) {
-                    addMessage(data.answer, 'ai');
-                    if (data.sources && data.sources.length > 0) {
-                        const sourcesText = "\n\n**Sources:**\n" + data.sources.map(s => `- ${s.substring(0, 100)}...`).join("\n");
-                        addMessage(sourcesText, 'ai');
-                    }
+                    const hasSources = data.sources && data.sources.length > 0;
+                    addMessage(data.answer, 'ai', hasSources);
                 } else {
                     addMessage("I'm sorry, I couldn't understand the server response.", 'ai');
                 }
